@@ -2,7 +2,7 @@ name: Mastodon Bot
 
 on:
   schedule:
-    - cron: '0 * * * *' # Every hour
+    - cron: '0 0 * * *' # Every day
 
 jobs:
   build:
