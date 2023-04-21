@@ -64,9 +64,9 @@ def main():
     for coin in COINS:
         price = float(get_price(coin))
         time.sleep(SLEEP_PREVENT_TOO_MANY_REQUESTS) # sleep necessary to prevent 429 Too Many Requests error.
-        price_1h = float(get_price_last_hour(coin, interval))
+        price_1h = float(get_price_last_hour(coin, INTERVAL))
 
-        status = generate_status(coin, price, price_1h, interval)
+        status = generate_status(coin, price, price_1h, INTERVAL)
 
         post_status(api, status)
 
