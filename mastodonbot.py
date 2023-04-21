@@ -4,11 +4,23 @@ import time
 import mastodon
 from mastodon import Mastodon
 
+COINS = [
+    'bitcoin', 'ethereum', 'solana', 
+    'binancecoin', 'cardano', 'monero', 
+    'litecoin','dogecoin'
+]
+
+API_BASE_URL = "https://mastodon.social"
+
+INTERVAL = 'daily'
+SLEEP_BETWEEN_POST = 1
+SLEEP_PREVENT_TOO_MANY_REQUESTS = 6
+
 
 def create_api():
     api = Mastodon(
         access_token=os.environ['ACCESS_TOKEN'], 
-        api_base_url="https://mastodon.social"
+        api_base_url=API_BASE_URL
     )
     return api
 
@@ -31,9 +43,11 @@ def generate_status(coin, price, price_1h, interval):
 
     emoji = "🔴⬇️" if change_percent < 0 else "🟢⬆️"
 
-    status = f"#{coin} Stats 📊📈📉 (last {interval})\n\n" \
-             f"Price: {price} USD💵\n" \
-             f"Variation: {change_percent}% ({price_change} USD💵) {emoji}"
+    status = (
+        f"#{coin} Stats 📊📈📉 (last {interval})\n\n" \
+        f"Price: {price} USD💵\n" \
+        f"Variation: {change_percent}% ({price_change} USD💵) {emoji}"
+    )
 
     return status
 
@@ -44,26 +58,19 @@ def post_status(api, status):
     except Exception as e:
         print("error ~> ", e)
 
-def main():
-    coins = [
-        'bitcoin', 'ethereum', 'solana', 
-        'binancecoin', 'cardano', 'monero', 
-        'litecoin','dogecoin'
-    ]
-    
+def main():    
     api = create_api()
-    interval = 'daily'
 
-    for coin in coins:
+    for coin in COINS:
         price = float(get_price(coin))
-        time.sleep(6) # sleep necessary to prevent 429 Too Many Requests error.
+        time.sleep(SLEEP_PREVENT_TOO_MANY_REQUESTS) # sleep necessary to prevent 429 Too Many Requests error.
         price_1h = float(get_price_last_hour(coin, interval))
 
         status = generate_status(coin, price, price_1h, interval)
 
         post_status(api, status)
 
-        time.sleep(1)
+        time.sleep(SLEEP_BETWEEN_POST)
 
 if __name__ == '__main__':
     main()
